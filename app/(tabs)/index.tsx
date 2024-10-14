@@ -4,8 +4,8 @@ import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function HomeScreen() {
 	const handleClick = async () => {
@@ -29,10 +29,7 @@ export default function HomeScreen() {
 				<ThemedText type="title">Welcome!</ThemedText>
 				<HelloWave />
 			</ThemedView>
-			<Button
-			title="write"
-			onPress={handleClick}
-			/>
+			<Button title="write" onPress={handleClick} />
 			<ThemedView style={styles.stepContainer}>
 				<ThemedText type="subtitle">Step 1: Try it</ThemedText>
 				<ThemedText>
