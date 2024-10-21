@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "lost-and-found-client",
-    "slug": "lost-and-found-client",
+    "name": "lost-and-found",
+    "slug": "lost-and-found",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.katayama9000.lostandfound"
     },
     "web": {
       "bundler": "metro",
@@ -34,7 +35,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "22da8ae3-30f4-48bf-8f46-c19029ab82e6"
+        "projectId": "54d386fd-c4c5-47b7-8507-68372ab2c217"
       }
     },
     "owner": "katayama9000"
