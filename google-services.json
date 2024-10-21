@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "844445487537",
+    "project_id": "lost-and-found-3f83f",
+    "storage_bucket": "lost-and-found-3f83f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844445487537:android:c928dbb1055cdc415e2d90",
+        "android_client_info": {
+          "package_name": "com.katayama9000.lostandfound"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAW5azQJb0UPxMWHDGlnybyUUSqO-jRe9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
