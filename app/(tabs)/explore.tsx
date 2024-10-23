@@ -1,124 +1,152 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { Image, Platform, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import {
+	Button,
+	FlatList,
+	StyleSheet,
+	Text,
+	TextInput,
+	View,
+} from "react-native";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+const FormScreen = () => {
+	// 旅行名の状態
+	const [tripTitle, setTripTitle] = useState("");
 
-export default function TabTwoScreen() {
+	// アイテムの状態
+	const [itemTitle, setItemTitle] = useState("");
+	const [interval, setInterval] = useState<number | null>(null);
+	const [items, setItems] = useState<
+		{
+			title: string;
+			interval: number;
+		}[]
+	>([]);
+
+	// アイテム追加ハンドラ
+	const handleAddItem = () => {
+		if (itemTitle !== "" && interval !== null) {
+			const newItem = {
+				title: itemTitle,
+				interval: interval,
+			};
+
+			setItems([...items, newItem]);
+			setItemTitle("");
+			setInterval(null);
+		}
+	};
+
+	// フォーム送信ハンドラ
+	const handleSubmit = () => {
+		const tripData = {
+			tripTitle,
+			items,
+		};
+
+		console.log("送信データ:", tripData);
+
+		// フォームをリセット
+		setTripTitle("");
+		setItems([]);
+	};
+
 	return (
-		<ParallaxScrollView
-			headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-			headerImage={
-				<Ionicons size={310} name="code-slash" style={styles.headerImage} />
-			}
-		>
-			<ThemedView style={styles.titleContainer}>
-				<ThemedText type="title">Explore</ThemedText>
-			</ThemedView>
-			<ThemedText>
-				This app includes example code to help you get started.
-			</ThemedText>
-			<Collapsible title="File-based routing">
-				<ThemedText>
-					This app has two screens:{" "}
-					<ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-					and{" "}
-					<ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-				</ThemedText>
-				<ThemedText>
-					The layout file in{" "}
-					<ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{" "}
-					sets up the tab navigator.
-				</ThemedText>
-				<ExternalLink href="https://docs.expo.dev/router/introduction">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Android, iOS, and web support">
-				<ThemedText>
-					You can open this project on Android, iOS, and the web. To open the
-					web version, press <ThemedText type="defaultSemiBold">w</ThemedText>{" "}
-					in the terminal running this project.
-				</ThemedText>
-			</Collapsible>
-			<Collapsible title="Images">
-				<ThemedText>
-					For static images, you can use the{" "}
-					<ThemedText type="defaultSemiBold">@2x</ThemedText> and{" "}
-					<ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to
-					provide files for different screen densities
-				</ThemedText>
-				<Image
-					source={require("@/assets/images/react-logo.png")}
-					style={{ alignSelf: "center" }}
-				/>
-				<ExternalLink href="https://reactnative.dev/docs/images">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Custom fonts">
-				<ThemedText>
-					Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText>{" "}
-					to see how to load{" "}
-					<ThemedText style={{ fontFamily: "SpaceMono" }}>
-						custom fonts such as this one.
-					</ThemedText>
-				</ThemedText>
-				<ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Light and dark mode components">
-				<ThemedText>
-					This template has light and dark mode support. The{" "}
-					<ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook
-					lets you inspect what the user's current color scheme is, and so you
-					can adjust UI colors accordingly.
-				</ThemedText>
-				<ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Animations">
-				<ThemedText>
-					This template includes an example of an animated component. The{" "}
-					<ThemedText type="defaultSemiBold">
-						components/HelloWave.tsx
-					</ThemedText>{" "}
-					component uses the powerful{" "}
-					<ThemedText type="defaultSemiBold">
-						react-native-reanimated
-					</ThemedText>{" "}
-					library to create a waving hand animation.
-				</ThemedText>
-				{Platform.select({
-					ios: (
-						<ThemedText>
-							The{" "}
-							<ThemedText type="defaultSemiBold">
-								components/ParallaxScrollView.tsx
-							</ThemedText>{" "}
-							component provides a parallax effect for the header image.
-						</ThemedText>
-					),
-				})}
-			</Collapsible>
-		</ParallaxScrollView>
+		<View style={styles.container}>
+			<Text style={styles.header}>フォーム</Text>
+
+			{/* 旅行名 */}
+			<Text style={styles.label}>旅行名</Text>
+			<TextInput
+				style={styles.input}
+				placeholder="旅行名を入力"
+				value={tripTitle}
+				onChangeText={(text) => setTripTitle(text)}
+			/>
+
+			{/* アイテム名 */}
+			<Text style={styles.label}>アイテム名</Text>
+			<TextInput
+				style={styles.input}
+				placeholder="アイテム名を入力"
+				value={itemTitle}
+				onChangeText={(text) => setItemTitle(text)}
+			/>
+
+			{/* 通知間隔 */}
+			<Text style={styles.label}>通知間隔 (例: 1h, 3h, 5h)</Text>
+			<TextInput
+				style={styles.input}
+				placeholder="通知間隔を入力"
+				value={interval?.toString() ?? ""}
+				onChangeText={(text) => setInterval(Number(text))}
+				keyboardType="numeric" // 数字のみのキーボードを表示
+			/>
+
+			{/* アイテム追加ボタン */}
+			<Button title="アイテムを追加" onPress={handleAddItem} color="#1E90FF" />
+
+			{/* 追加されたアイテムのリスト */}
+			<FlatList
+				data={items}
+				keyExtractor={(item, index) => index.toString()}
+				renderItem={({ item }) => (
+					<View style={styles.item}>
+						<Text style={styles.itemTitle}>{item.title}</Text>
+						<Text style={styles.itemInterval}>通知間隔: {item.interval}h</Text>
+					</View>
+				)}
+			/>
+
+			{/* 送信ボタン */}
+			<Button title="送信" onPress={handleSubmit} color="#32CD32" />
+		</View>
 	);
-}
+};
 
 const styles = StyleSheet.create({
-	headerImage: {
-		color: "#808080",
-		bottom: -90,
-		left: -35,
-		position: "absolute",
+	container: {
+		flex: 1,
+		padding: 20,
+		backgroundColor: "#f5f5f5",
 	},
-	titleContainer: {
-		flexDirection: "row",
-		gap: 8,
+	header: {
+		fontSize: 24,
+		fontWeight: "bold",
+		marginBottom: 20,
+		textAlign: "center",
+		color: "#333",
+	},
+	label: {
+		fontSize: 16,
+		marginBottom: 8,
+		color: "#555",
+	},
+	input: {
+		height: 50,
+		borderColor: "#ccc",
+		borderWidth: 1,
+		borderRadius: 10,
+		paddingHorizontal: 15,
+		marginBottom: 15,
+		backgroundColor: "#fff",
+	},
+	item: {
+		padding: 15,
+		marginVertical: 8,
+		backgroundColor: "#e0f7fa",
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: "#00796b",
+	},
+	itemTitle: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: "#00796b",
+	},
+	itemInterval: {
+		fontSize: 16,
+		color: "#444",
 	},
 });
+
+export default FormScreen;

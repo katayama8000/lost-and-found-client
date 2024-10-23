@@ -146,7 +146,7 @@ export default function RootLayout() {
 
 	return (
 		<ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-			<Text>Your Expo push token: {expoPushToken}</Text>
+			{/* <Text>Your Expo push token: {expoPushToken}</Text>
 			<View style={{ alignItems: "center", justifyContent: "center" }}>
 				<Text>Title: {notification?.request.content.title} </Text>
 				<Text>Body: {notification?.request.content.body}</Text>
@@ -160,7 +160,7 @@ export default function RootLayout() {
 				onPress={async () => {
 					await sendPushNotification(expoPushToken);
 				}}
-			/>
+			/> */}
 			<Stack>
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen name="+not-found" />
