@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
 	Button,
 	FlatList,
@@ -8,42 +9,50 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 
-const FormScreen = () => {
-	// 旅行名の状態
-	const [tripTitle, setTripTitle] = useState("");
+type Item = {
+	title: string;
+	interval: number;
+};
 
-	// アイテムの状態
-	const [itemTitle, setItemTitle] = useState("");
+type DropDownItem = {
+	label: string;
+	value: number;
+};
+
+const FormScreen: React.FC = () => {
+	// States
+	const [tripTitle, setTripTitle] = useState<string>("");
+	const [itemTitle, setItemTitle] = useState<string>("");
 	const [interval, setInterval] = useState<number | null>(null);
-	const [items, setItems] = useState<
-		{
-			title: string;
-			interval: number;
-		}[]
-	>([]);
+	const [items, setItems] = useState<Item[]>([]);
+	const [open, setOpen] = useState<boolean>(false);
+	const [value, setValue] = useState<number | null>(null);
+	const [Ditems, setDItems] = useState<DropDownItem[]>([
+		{ label: "1h", value: 1 },
+		{ label: "3h", value: 3 },
+		{ label: "5h", value: 5 },
+	]);
 
-	// アイテム追加ハンドラ
-	const handleAddItem = () => {
+	// Handlers
+	const handleAddItem = (): void => {
 		if (itemTitle !== "" && interval !== null) {
-			const newItem = {
+			const newItem: Item = {
 				title: itemTitle,
 				interval: interval,
 			};
-
 			setItems([...items, newItem]);
 			setItemTitle("");
 			setInterval(null);
 		}
 	};
 
-	// アイテム削除ハンドラ
-	const handleDeleteItem = (index: number) => {
+	const handleDeleteItem = (index: number): void => {
 		setItems(items.filter((_, i) => i !== index));
 	};
 
-	// フォーム送信ハンドラ
-	const handleSubmit = () => {
+	const handleSubmit = (): void => {
 		const tripData = {
 			tripTitle,
 			items,
@@ -51,7 +60,7 @@ const FormScreen = () => {
 
 		console.log("送信データ:", tripData);
 
-		// フォームをリセット
+		// Reset form
 		setTripTitle("");
 		setItems([]);
 	};
@@ -60,7 +69,7 @@ const FormScreen = () => {
 		<View style={styles.container}>
 			<Text style={styles.header}>旅行プラン作成フォーム</Text>
 
-			{/* 旅行名 */}
+			{/* Trip Title */}
 			<Text style={styles.label}>旅行名</Text>
 			<TextInput
 				style={styles.input}
@@ -69,7 +78,7 @@ const FormScreen = () => {
 				onChangeText={(text) => setTripTitle(text)}
 			/>
 
-			{/* アイテム名 */}
+			{/* Item Name */}
 			<Text style={styles.label}>アイテム名</Text>
 			<TextInput
 				style={styles.input}
@@ -78,25 +87,30 @@ const FormScreen = () => {
 				onChangeText={(text) => setItemTitle(text)}
 			/>
 
-			{/* 通知間隔 */}
+			{/* Notification Interval */}
 			<Text style={styles.label}>通知間隔 (例: 1h, 3h, 5h)</Text>
-			<TextInput
-				style={styles.input}
-				placeholder="通知間隔を入力"
-				value={interval?.toString() ?? ""}
-				onChangeText={(text) => setInterval(Number(text))}
-				keyboardType="numeric"
+			<DropDownPicker
+				open={open}
+				value={value}
+				items={Ditems}
+				setOpen={setOpen}
+				setValue={(val) => {
+					setValue(val);
+					setInterval(val || null);
+				}}
+				setItems={setDItems}
+				placeholder="選択してください"
 			/>
 
-			{/* アイテム追加ボタン */}
+			{/* Add Item Button */}
 			<TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
 				<Text style={styles.addButtonText}>アイテムを追加</Text>
 			</TouchableOpacity>
 
-			{/* 追加されたアイテムのリスト */}
+			{/* List of Added Items */}
 			<FlatList
 				data={items}
-				keyExtractor={(item, index) => index.toString()}
+				keyExtractor={(_, index) => index.toString()}
 				renderItem={({ item, index }) => (
 					<View style={styles.item}>
 						<View>
@@ -115,7 +129,7 @@ const FormScreen = () => {
 				)}
 			/>
 
-			{/* 送信ボタン */}
+			{/* Submit Button */}
 			<TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
 				<Text style={styles.submitButtonText}>送信</Text>
 			</TouchableOpacity>
