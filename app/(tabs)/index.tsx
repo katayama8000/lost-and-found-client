@@ -1,7 +1,7 @@
 import { db } from "@/config/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import type React from "react";
-import { Button, FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 const HomeScreen = () => {
 	const handleClick = async () => {

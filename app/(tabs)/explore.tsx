@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { Colors } from "@/constants/Colors";
+import type React from "react";
+import { type FC, useState } from "react";
 import {
-	Button,
 	FlatList,
 	StyleSheet,
 	Text,
@@ -8,100 +9,112 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 
-const FormScreen = () => {
-	// 旅行名の状態
-	const [tripTitle, setTripTitle] = useState("");
+type ScheduleItem = {
+	name: string;
+	reminderInterval: number;
+};
 
-	// アイテムの状態
-	const [itemTitle, setItemTitle] = useState("");
-	const [interval, setInterval] = useState<number | null>(null);
-	const [items, setItems] = useState<
-		{
-			title: string;
-			interval: number;
-		}[]
-	>([]);
+const TripPlanner: FC = () => {
+	const [tripName, setTripName] = useState<string>("");
+	const [scheduleName, setScheduleName] = useState<string>("");
+	const [reminderInterval, setReminderInterval] = useState<number | null>(null);
+	const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
+	const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+	const [dropdownValue, setDropdownValue] = useState<number | null>(null);
+	const [dropdownOptions, setDropdownOptions] = useState<
+		{ label: string; value: number }[]
+	>([
+		{ label: "1h", value: 1 },
+		{ label: "3h", value: 3 },
+		{ label: "5h", value: 5 },
+	]);
 
-	// アイテム追加ハンドラ
-	const handleAddItem = () => {
-		if (itemTitle !== "" && interval !== null) {
-			const newItem = {
-				title: itemTitle,
-				interval: interval,
-			};
-
-			setItems([...items, newItem]);
-			setItemTitle("");
-			setInterval(null);
-		}
+	const addScheduleItem = () => {
+		if (!scheduleName || reminderInterval === null) return;
+		setScheduleItems([
+			...scheduleItems,
+			{ name: scheduleName, reminderInterval },
+		]);
+		setScheduleName("");
+		setReminderInterval(null);
+		setDropdownValue(null);
 	};
 
-	// アイテム削除ハンドラ
-	const handleDeleteItem = (index: number) => {
-		setItems(items.filter((_, i) => i !== index));
+	const removeScheduleItem = (index: number) => {
+		setScheduleItems(scheduleItems.filter((_, i) => i !== index));
 	};
 
-	// フォーム送信ハンドラ
-	const handleSubmit = () => {
-		const tripData = {
-			tripTitle,
-			items,
-		};
-
+	const submitTripPlan = () => {
+		const tripData = { tripName, scheduleItems };
 		console.log("送信データ:", tripData);
-
-		// フォームをリセット
-		setTripTitle("");
-		setItems([]);
+		setTripName("");
+		setScheduleItems([]);
 	};
+
+	// ボタンが押せるかどうかのフラグ
+	const isAddButtonDisabled = !scheduleName || reminderInterval === null;
+	const isSubmitButtonDisabled = !tripName || scheduleItems.length === 0;
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.header}>フォーム</Text>
+			<Text style={styles.header}>旅行プラン作成フォーム</Text>
 
-			{/* 旅行名 */}
 			<Text style={styles.label}>旅行名</Text>
 			<TextInput
 				style={styles.input}
 				placeholder="旅行名を入力"
-				value={tripTitle}
-				onChangeText={(text) => setTripTitle(text)}
+				value={tripName}
+				onChangeText={setTripName}
 			/>
 
-			{/* アイテム名 */}
 			<Text style={styles.label}>アイテム名</Text>
 			<TextInput
 				style={styles.input}
 				placeholder="アイテム名を入力"
-				value={itemTitle}
-				onChangeText={(text) => setItemTitle(text)}
+				value={scheduleName}
+				onChangeText={setScheduleName}
 			/>
 
-			{/* 通知間隔 */}
-			<Text style={styles.label}>通知間隔 (例: 1h, 3h, 5h)</Text>
-			<TextInput
-				style={styles.input}
-				placeholder="通知間隔を入力"
-				value={interval?.toString() ?? ""}
-				onChangeText={(text) => setInterval(Number(text))}
-				keyboardType="numeric"
+			<Text style={styles.label}>通知間隔</Text>
+			<DropDownPicker
+				open={isDropdownOpen}
+				value={dropdownValue}
+				items={dropdownOptions}
+				setOpen={setIsDropdownOpen}
+				setValue={(val) => {
+					setDropdownValue(val);
+					setReminderInterval(val ?? null);
+				}}
+				setItems={setDropdownOptions}
+				placeholder="間隔を選択"
+				style={styles.dropdown}
+				dropDownContainerStyle={styles.dropdownContainer}
 			/>
 
-			{/* アイテム追加ボタン */}
-			<Button title="アイテムを追加" onPress={handleAddItem} color="#1E90FF" />
+			<TouchableOpacity
+				style={[styles.addButton, isAddButtonDisabled && styles.disabledButton]}
+				onPress={addScheduleItem}
+				disabled={isAddButtonDisabled}
+			>
+				<Text style={styles.addButtonText}>+ アイテムを追加</Text>
+			</TouchableOpacity>
 
-			{/* 追加されたアイテムのリスト */}
 			<FlatList
-				data={items}
-				keyExtractor={(item, index) => index.toString()}
+				data={scheduleItems}
+				keyExtractor={(_, index) => index.toString()}
 				renderItem={({ item, index }) => (
 					<View style={styles.item}>
-						<Text style={styles.itemTitle}>{item.title}</Text>
-						<Text style={styles.itemInterval}>通知間隔: {item.interval}h</Text>
+						<View>
+							<Text style={styles.itemName}>{item.name}</Text>
+							<Text style={styles.itemInterval}>
+								通知間隔: {item.reminderInterval}h
+							</Text>
+						</View>
 						<TouchableOpacity
 							style={styles.deleteButton}
-							onPress={() => handleDeleteItem(index)}
+							onPress={() => removeScheduleItem(index)}
 						>
 							<Text style={styles.deleteButtonText}>削除</Text>
 						</TouchableOpacity>
@@ -109,8 +122,16 @@ const FormScreen = () => {
 				)}
 			/>
 
-			{/* 送信ボタン */}
-			<Button title="送信" onPress={handleSubmit} color="#32CD32" />
+			<TouchableOpacity
+				style={[
+					styles.submitButton,
+					isSubmitButtonDisabled && styles.disabledButton,
+				]}
+				onPress={submitTripPlan}
+				disabled={isSubmitButtonDisabled}
+			>
+				<Text style={styles.submitButtonText}>送信</Text>
+			</TouchableOpacity>
 		</View>
 	);
 };
@@ -119,19 +140,19 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
-		backgroundColor: "#f5f5f5",
+		backgroundColor: "#f7fafc",
 	},
 	header: {
-		fontSize: 24,
+		fontSize: 26,
 		fontWeight: "bold",
 		marginBottom: 20,
 		textAlign: "center",
-		color: "#333",
+		color: Colors.primary,
 	},
 	label: {
-		fontSize: 16,
-		marginBottom: 8,
-		color: "#555",
+		fontSize: 18,
+		marginBottom: 10,
+		color: Colors.primary,
 	},
 	input: {
 		height: 50,
@@ -141,36 +162,81 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 15,
 		marginBottom: 15,
 		backgroundColor: "#fff",
+		fontSize: 16,
+	},
+	dropdown: {
+		borderRadius: 10,
+		borderColor: "#ccc",
+		backgroundColor: "#fff",
+	},
+	dropdownContainer: {
+		borderRadius: 10,
+	},
+	addButton: {
+		backgroundColor: Colors.primary,
+		paddingVertical: 12,
+		borderRadius: 10,
+		marginVertical: 15,
+		alignItems: "center",
+		shadowColor: Colors.primary,
+		shadowOpacity: 0.3,
+		shadowOffset: { width: 0, height: 2 },
+		elevation: 4,
+	},
+	addButtonText: {
+		color: "#fff",
+		fontSize: 18,
+		fontWeight: "bold",
+	},
+	disabledButton: {
+		backgroundColor: "#b0c4de",
 	},
 	item: {
-		padding: 15,
-		marginVertical: 8,
-		backgroundColor: "#e0f7fa",
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: "#00796b",
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
+		padding: 15,
+		marginVertical: 8,
+		backgroundColor: "#e7f3ff",
+		borderRadius: 10,
+		shadowColor: "#000",
+		shadowOpacity: 0.1,
+		shadowOffset: { width: 0, height: 2 },
+		elevation: 2,
+		borderLeftWidth: 5,
+		borderLeftColor: Colors.primary,
 	},
-	itemTitle: {
+	itemName: {
 		fontSize: 18,
-		fontWeight: "bold",
-		color: "#00796b",
+		fontWeight: "600",
+		color: Colors.primary,
 	},
 	itemInterval: {
 		fontSize: 16,
-		color: "#444",
+		color: "#555",
 	},
 	deleteButton: {
-		backgroundColor: "#ff6347",
+		backgroundColor: Colors.secondary,
 		borderRadius: 5,
-		padding: 5,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
 	},
 	deleteButtonText: {
 		color: "#fff",
+		fontWeight: "600",
+	},
+	submitButton: {
+		backgroundColor: Colors.primary,
+		paddingVertical: 15,
+		borderRadius: 10,
+		marginTop: 10,
+		alignItems: "center",
+	},
+	submitButtonText: {
+		color: "#fff",
+		fontSize: 18,
 		fontWeight: "bold",
 	},
 });
 
-export default FormScreen;
+export default TripPlanner;
