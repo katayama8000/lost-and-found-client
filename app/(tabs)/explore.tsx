@@ -5,6 +5,7 @@ import {
 	StyleSheet,
 	Text,
 	TextInput,
+	TouchableOpacity,
 	View,
 } from "react-native";
 
@@ -34,6 +35,11 @@ const FormScreen = () => {
 			setItemTitle("");
 			setInterval(null);
 		}
+	};
+
+	// アイテム削除ハンドラ
+	const handleDeleteItem = (index: number) => {
+		setItems(items.filter((_, i) => i !== index));
 	};
 
 	// フォーム送信ハンドラ
@@ -79,7 +85,7 @@ const FormScreen = () => {
 				placeholder="通知間隔を入力"
 				value={interval?.toString() ?? ""}
 				onChangeText={(text) => setInterval(Number(text))}
-				keyboardType="numeric" // 数字のみのキーボードを表示
+				keyboardType="numeric"
 			/>
 
 			{/* アイテム追加ボタン */}
@@ -89,10 +95,16 @@ const FormScreen = () => {
 			<FlatList
 				data={items}
 				keyExtractor={(item, index) => index.toString()}
-				renderItem={({ item }) => (
+				renderItem={({ item, index }) => (
 					<View style={styles.item}>
 						<Text style={styles.itemTitle}>{item.title}</Text>
 						<Text style={styles.itemInterval}>通知間隔: {item.interval}h</Text>
+						<TouchableOpacity
+							style={styles.deleteButton}
+							onPress={() => handleDeleteItem(index)}
+						>
+							<Text style={styles.deleteButtonText}>削除</Text>
+						</TouchableOpacity>
 					</View>
 				)}
 			/>
@@ -137,6 +149,9 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		borderWidth: 1,
 		borderColor: "#00796b",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
 	},
 	itemTitle: {
 		fontSize: 18,
@@ -146,6 +161,15 @@ const styles = StyleSheet.create({
 	itemInterval: {
 		fontSize: 16,
 		color: "#444",
+	},
+	deleteButton: {
+		backgroundColor: "#ff6347",
+		borderRadius: 5,
+		padding: 5,
+	},
+	deleteButtonText: {
+		color: "#fff",
+		fontWeight: "bold",
 	},
 });
 
