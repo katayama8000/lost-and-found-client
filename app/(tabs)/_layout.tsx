@@ -1,7 +1,7 @@
+import { Colors } from "@/constants/Colors";
 import type React from "react";
-import { useState } from "react";
+import { type FC, useState } from "react";
 import {
-	Button,
 	FlatList,
 	StyleSheet,
 	Text,
@@ -11,42 +11,51 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
-type Item = {
-	title: string;
-	interval: number;
+type ScheduleItem = {
+	name: string;
+	reminderInterval: number;
 };
 
-const FormScreen: React.FC = () => {
-	const [tripTitle, setTripTitle] = useState<string>("");
-	const [itemTitle, setItemTitle] = useState<string>("");
-	const [interval, setInterval] = useState<number | null>(null);
-	const [items, setItems] = useState<Item[]>([]);
-	const [open, setOpen] = useState<boolean>(false);
-	const [value, setValue] = useState<number | null>(null);
-	const [Ditems, setDItems] = useState<{ label: string; value: number }[]>([
+const TripPlanner: FC = () => {
+	const [tripName, setTripName] = useState<string>("");
+	const [scheduleName, setScheduleName] = useState<string>("");
+	const [reminderInterval, setReminderInterval] = useState<number | null>(null);
+	const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
+	const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+	const [dropdownValue, setDropdownValue] = useState<number | null>(null);
+	const [dropdownOptions, setDropdownOptions] = useState<
+		{ label: string; value: number }[]
+	>([
 		{ label: "1h", value: 1 },
 		{ label: "3h", value: 3 },
 		{ label: "5h", value: 5 },
 	]);
 
-	const handleAddItem = () => {
-		if (itemTitle && interval !== null) {
-			setItems([...items, { title: itemTitle, interval }]);
-			setItemTitle("");
-			setInterval(null);
-		}
+	const addScheduleItem = () => {
+		if (!scheduleName || reminderInterval === null) return;
+		setScheduleItems([
+			...scheduleItems,
+			{ name: scheduleName, reminderInterval },
+		]);
+		setScheduleName("");
+		setReminderInterval(null);
+		setDropdownValue(null);
 	};
 
-	const handleDeleteItem = (index: number) => {
-		setItems(items.filter((_, i) => i !== index));
+	const removeScheduleItem = (index: number) => {
+		setScheduleItems(scheduleItems.filter((_, i) => i !== index));
 	};
 
-	const handleSubmit = () => {
-		const tripData = { tripTitle, items };
+	const submitTripPlan = () => {
+		const tripData = { tripName, scheduleItems };
 		console.log("送信データ:", tripData);
-		setTripTitle("");
-		setItems([]);
+		setTripName("");
+		setScheduleItems([]);
 	};
+
+	// ボタンが押せるかどうかのフラグ
+	const isAddButtonDisabled = !scheduleName || reminderInterval === null;
+	const isSubmitButtonDisabled = !tripName || scheduleItems.length === 0;
 
 	return (
 		<View style={styles.container}>
@@ -56,52 +65,56 @@ const FormScreen: React.FC = () => {
 			<TextInput
 				style={styles.input}
 				placeholder="旅行名を入力"
-				value={tripTitle}
-				onChangeText={setTripTitle}
+				value={tripName}
+				onChangeText={setTripName}
 			/>
 
 			<Text style={styles.label}>アイテム名</Text>
 			<TextInput
 				style={styles.input}
 				placeholder="アイテム名を入力"
-				value={itemTitle}
-				onChangeText={setItemTitle}
+				value={scheduleName}
+				onChangeText={setScheduleName}
 			/>
 
 			<Text style={styles.label}>通知間隔</Text>
 			<DropDownPicker
-				open={open}
-				value={value}
-				items={Ditems}
-				setOpen={setOpen}
+				open={isDropdownOpen}
+				value={dropdownValue}
+				items={dropdownOptions}
+				setOpen={setIsDropdownOpen}
 				setValue={(val) => {
-					setValue(val);
-					setInterval(val ?? null);
+					setDropdownValue(val);
+					setReminderInterval(val ?? null);
 				}}
-				setItems={setDItems}
+				setItems={setDropdownOptions}
 				placeholder="間隔を選択"
 				style={styles.dropdown}
 				dropDownContainerStyle={styles.dropdownContainer}
 			/>
 
-			<TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-				<Text style={styles.addButtonText}>アイテムを追加</Text>
+			<TouchableOpacity
+				style={[styles.addButton, isAddButtonDisabled && styles.disabledButton]}
+				onPress={addScheduleItem}
+				disabled={isAddButtonDisabled}
+			>
+				<Text style={styles.addButtonText}>+ アイテムを追加</Text>
 			</TouchableOpacity>
 
 			<FlatList
-				data={items}
+				data={scheduleItems}
 				keyExtractor={(_, index) => index.toString()}
 				renderItem={({ item, index }) => (
 					<View style={styles.item}>
 						<View>
-							<Text style={styles.itemTitle}>{item.title}</Text>
+							<Text style={styles.itemName}>{item.name}</Text>
 							<Text style={styles.itemInterval}>
-								通知間隔: {item.interval}h
+								通知間隔: {item.reminderInterval}h
 							</Text>
 						</View>
 						<TouchableOpacity
 							style={styles.deleteButton}
-							onPress={() => handleDeleteItem(index)}
+							onPress={() => removeScheduleItem(index)}
 						>
 							<Text style={styles.deleteButtonText}>削除</Text>
 						</TouchableOpacity>
@@ -109,7 +122,14 @@ const FormScreen: React.FC = () => {
 				)}
 			/>
 
-			<TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+			<TouchableOpacity
+				style={[
+					styles.submitButton,
+					isSubmitButtonDisabled && styles.disabledButton,
+				]}
+				onPress={submitTripPlan}
+				disabled={isSubmitButtonDisabled}
+			>
 				<Text style={styles.submitButtonText}>送信</Text>
 			</TouchableOpacity>
 		</View>
@@ -127,12 +147,12 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		marginBottom: 20,
 		textAlign: "center",
-		color: "#333",
+		color: Colors.primary,
 	},
 	label: {
 		fontSize: 18,
 		marginBottom: 10,
-		color: "#444",
+		color: Colors.primary,
 	},
 	input: {
 		height: 50,
@@ -153,16 +173,23 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 	},
 	addButton: {
-		backgroundColor: "#5b9bd5",
+		backgroundColor: Colors.primary,
 		paddingVertical: 12,
 		borderRadius: 10,
 		marginVertical: 15,
+		alignItems: "center",
+		shadowColor: Colors.primary,
+		shadowOpacity: 0.3,
+		shadowOffset: { width: 0, height: 2 },
+		elevation: 4,
 	},
 	addButtonText: {
 		color: "#fff",
 		fontSize: 18,
 		fontWeight: "bold",
-		textAlign: "center",
+	},
+	disabledButton: {
+		backgroundColor: "#b0c4de",
 	},
 	item: {
 		flexDirection: "row",
@@ -177,19 +204,19 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 2 },
 		elevation: 2,
 		borderLeftWidth: 5,
-		borderLeftColor: "#5b9bd5",
+		borderLeftColor: Colors.primary,
 	},
-	itemTitle: {
+	itemName: {
 		fontSize: 18,
 		fontWeight: "600",
-		color: "#3d85c6",
+		color: Colors.primary,
 	},
 	itemInterval: {
 		fontSize: 16,
 		color: "#555",
 	},
 	deleteButton: {
-		backgroundColor: "#ff5252",
+		backgroundColor: Colors.secondary,
 		borderRadius: 5,
 		paddingVertical: 5,
 		paddingHorizontal: 10,
@@ -199,17 +226,17 @@ const styles = StyleSheet.create({
 		fontWeight: "600",
 	},
 	submitButton: {
-		backgroundColor: "#4caf50",
+		backgroundColor: Colors.primary,
 		paddingVertical: 15,
 		borderRadius: 10,
 		marginTop: 10,
+		alignItems: "center",
 	},
 	submitButtonText: {
 		color: "#fff",
 		fontSize: 18,
 		fontWeight: "bold",
-		textAlign: "center",
 	},
 });
 
-export default FormScreen;
+export default TripPlanner;
