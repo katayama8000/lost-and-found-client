@@ -1,17 +1,54 @@
 import { db } from "@/config/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import {
+	type DocumentData,
+	type QueryDocumentSnapshot,
+	collection,
+	getDocs,
+} from "firebase/firestore";
 import type React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { type FC, useEffect, useState } from "react";
+import { FlatList, Text, View } from "react-native";
+import { styles } from "./index.style";
+
+interface ItemData {
+	id: string;
+	name: string;
+	notificationInterval: number;
+	lastNotifiedAt: string;
+	isNotifyEnabled: boolean;
+	lastConfirmedAt: string;
+	status: string;
+}
+
+const itemConverter = {
+	toFirestore: (item: ItemData): DocumentData => {
+		return {
+			name: item.name,
+			notificationInterval: item.notificationInterval,
+			lastNotifiedAt: item.lastNotifiedAt,
+			isNotifyEnabled: item.isNotifyEnabled,
+			lastConfirmedAt: item.lastConfirmedAt,
+			status: item.status,
+		};
+	},
+	fromFirestore: (snapshot: QueryDocumentSnapshot): ItemData => {
+		const data = snapshot.data();
+		return {
+			id: snapshot.id,
+			name: data.name,
+			notificationInterval: data.notificationInterval,
+			lastNotifiedAt: data.lastNotifiedAt,
+			isNotifyEnabled: data.isNotifyEnabled,
+			lastConfirmedAt: data.lastConfirmedAt,
+			status: data.status,
+		};
+	},
+};
 
 const HomeScreen = () => {
-	const handleClick = async () => {
-		await setDoc(doc(db, "cities", "LA"), {
-			name: "Los Angeles",
-			state: "CA",
-			country: "USA",
-		});
-		alert("Document added!");
-	};
+	const [items, setItems] = useState<ItemData[]>([]);
+	const userId = "katayama8000"; // Replace with the current user's ID
+	const tripId = "XM3tC0Wi1Mw0IHcBgobR"; // Replace with the actual trip ID you want to fetch items for
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -26,100 +63,54 @@ const HomeScreen = () => {
 		}
 	};
 
+	const fetchItems = async () => {
+		try {
+			// Adjust the path to include trips
+			const itemsCollection = collection(
+				db,
+				`users/${userId}/trips/${tripId}/items`,
+			).withConverter(itemConverter); // Apply the converter here
+			const itemSnapshot = await getDocs(itemsCollection);
+			const itemList = itemSnapshot.docs.map((doc) => doc.data());
+
+			setItems(itemList);
+		} catch (error) {
+			console.error("Error fetching items from Firestore:", error);
+		}
+	};
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		fetchItems();
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.header}>バリ旅行</Text>
 			<FlatList
-				data={[
-					{
-						key: "1",
-						title: "パスポート",
-						interval: "1h",
-						lastChecked: "確認",
-					},
-					{
-						key: "2",
-						title: "財布",
-						interval: "3h",
-						lastChecked: "確認していない",
-					},
-					{ key: "3", title: "指輪", interval: "5h", lastChecked: "無くした" },
-				]}
+				data={items}
 				renderItem={({ item }) => (
 					<Item item={item} getStatusColor={getStatusColor} />
 				)}
-				keyExtractor={(item) => item.key}
+				keyExtractor={(item) => item.id}
 			/>
 		</View>
 	);
 };
 
 type ItemProps = {
-	item: { title: string; interval: string; lastChecked: string };
+	item: ItemData;
 	getStatusColor: (status: string) => object;
 };
 
-const Item: React.FC<ItemProps> = ({ item, getStatusColor }) => {
+const Item: FC<ItemProps> = ({ item, getStatusColor }) => {
 	return (
-		<View style={[styles.item, getStatusColor(item.lastChecked)]}>
-			<Text style={styles.title}>{item.title}</Text>
-			<Text style={styles.info}>通知間隔: {item.interval}</Text>
-			<Text style={styles.info}>最終操作: {item.lastChecked}</Text>
+		<View style={[styles.item, getStatusColor(item.status)]}>
+			<Text style={styles.title}>{item.name}</Text>
+			<Text style={styles.info}>最終通知日時: {item.lastNotifiedAt}</Text>
+			<Text style={styles.info}>最終確認日時: {item.lastConfirmedAt}</Text>
 		</View>
 	);
 };
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-		backgroundColor: "#f5f5f5",
-	},
-	header: {
-		fontSize: 24,
-		fontWeight: "bold",
-		marginBottom: 20,
-		textAlign: "center",
-	},
-	item: {
-		backgroundColor: "#fff",
-		padding: 20,
-		marginVertical: 8,
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: "#ddd",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.2,
-		shadowRadius: 2,
-		elevation: 2,
-	},
-	title: {
-		fontSize: 18,
-		fontWeight: "bold",
-		color: "#333",
-		marginBottom: 8,
-	},
-	info: {
-		fontSize: 14,
-		color: "#666",
-	},
-	// 色分けスタイル
-	confirmed: {
-		backgroundColor: "#d4edda",
-		borderColor: "#c3e6cb",
-	},
-	unchecked: {
-		backgroundColor: "#fff3cd",
-		borderColor: "#ffeeba",
-	},
-	lost: {
-		backgroundColor: "#f8d7da",
-		borderColor: "#f5c6cb",
-	},
-	defaultStatus: {
-		backgroundColor: "#ffffff",
-	},
-});
 
 export default HomeScreen;
