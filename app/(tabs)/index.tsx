@@ -1,8 +1,10 @@
 import { db } from "@/config/firebase";
+import { tripId, userId } from "@/constants/Ids";
+import { useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import type React from "react";
 import { type FC, useEffect, useState } from "react";
-import { FlatList, Text, View } from "react-native";
+import { Button, FlatList, Text, View } from "react-native";
 import { itemConverter } from "../../converter/itemConverter";
 import { styles } from "./index.style";
 
@@ -18,8 +20,7 @@ export type Item = {
 
 const HomeScreen = () => {
 	const [items, setItems] = useState<Item[]>([]);
-	const userId = "katayama8000"; // Replace with the current user's ID
-	const tripId = "XM3tC0Wi1Mw0IHcBgobR"; // Replace with the actual trip ID you want to fetch items for
+	const { push } = useRouter();
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -61,6 +62,16 @@ const HomeScreen = () => {
 	return (
 		<View style={styles.container}>
 			<Text style={styles.header}>バリ旅行</Text>
+			{/* --- delete --- */}
+			<Button
+				title="openModal"
+				onPress={() => {
+					push("/checkModal");
+				}}
+			/>
+			{/* send push notification */}
+
+			{/* --- delete --- */}
 			<FlatList
 				data={items}
 				renderItem={({ item }) => (

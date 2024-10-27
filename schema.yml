@@ -1,8 +1,6 @@
 User:
-  tokens:
-    type: array
-    items:
-      type: string
+  pushToken:
+    type: string
   Trip: # Collection
     destination:
       type: string
