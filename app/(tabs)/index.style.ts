@@ -51,4 +51,7 @@ export const styles = StyleSheet.create({
 	defaultStatus: {
 		backgroundColor: "#ffffff",
 	},
+	nullInfo: {
+		color: "#999",
+	},
 });
