@@ -1,0 +1,29 @@
+User:
+  tokens:
+    type: array
+    items:
+      type: string
+  Trip: # Collection
+    destination:
+      type: string
+    startDate:
+      type: Timestamp  
+    endDate:
+      type: Timestamp  
+    Item: # Collection
+      name:
+        type: string
+      notificationInterval:
+        type: number  
+      lastNotifiedAt:
+        type: Timestamp  
+      isNotifyEnabled:
+        type: boolean  
+      lastConfirmedAt:
+        type: Timestamp  
+      status:
+        type: string
+        enum:
+          - checked
+          - unchecked
+          - lost

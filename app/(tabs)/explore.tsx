@@ -1,124 +1,166 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { Image, Platform, StyleSheet } from "react-native";
+import { db } from "@/config/firebase";
+import { addDoc, collection } from "firebase/firestore";
+import type React from "react";
+import { type FC, useState } from "react";
+import {
+	Alert,
+	FlatList,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View,
+} from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
+import { styles } from "./explore.style";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+type ScheduleItem = {
+	name: string;
+	reminderInterval: number;
+};
 
-export default function TabTwoScreen() {
-	return (
-		<ParallaxScrollView
-			headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-			headerImage={
-				<Ionicons size={310} name="code-slash" style={styles.headerImage} />
+const TripPlanner: FC = () => {
+	const [tripDestination, setTripDestination] = useState<string>("");
+	const [itemName, setItemName] = useState<string>("");
+	const [notificationInterval, setNotificationInterval] = useState<
+		number | null
+	>(null);
+	const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
+	const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+	const [dropdownValue, setDropdownValue] = useState<number | null>(null);
+	const [dropdownOptions, setDropdownOptions] = useState<
+		{ label: string; value: number }[]
+	>([
+		{ label: "1時間", value: 1 },
+		{ label: "3時間", value: 3 },
+		{ label: "5時間", value: 5 },
+	]);
+
+	const addScheduleItem = () => {
+		if (!itemName || notificationInterval === null) return;
+		setScheduleItems([
+			...scheduleItems,
+			{ name: itemName, reminderInterval: notificationInterval },
+		]);
+		setItemName("");
+		setNotificationInterval(null);
+		setDropdownValue(null);
+	};
+
+	const removeScheduleItem = (index: number) => {
+		setScheduleItems(scheduleItems.filter((_, i) => i !== index));
+	};
+
+	const submitTripPlan = async () => {
+		const userId = "katayama8000"; // TODO: Firebase AuthでログインしているユーザーのIDを取得する
+		try {
+			const tripRef = await addDoc(collection(db, "users", userId, "trips"), {
+				destination: tripDestination,
+			});
+
+			for (const item of scheduleItems) {
+				await addDoc(
+					collection(db, "users", userId, "trips", tripRef.id, "items"),
+					{
+						name: item.name,
+						reminderInterval: item.reminderInterval,
+						lastNotifiedAt: null,
+						isNotifyEnabled: true,
+						lastConfirmedAt: null,
+						status: "unchecked",
+					},
+				);
 			}
-		>
-			<ThemedView style={styles.titleContainer}>
-				<ThemedText type="title">Explore</ThemedText>
-			</ThemedView>
-			<ThemedText>
-				This app includes example code to help you get started.
-			</ThemedText>
-			<Collapsible title="File-based routing">
-				<ThemedText>
-					This app has two screens:{" "}
-					<ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-					and{" "}
-					<ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-				</ThemedText>
-				<ThemedText>
-					The layout file in{" "}
-					<ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{" "}
-					sets up the tab navigator.
-				</ThemedText>
-				<ExternalLink href="https://docs.expo.dev/router/introduction">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Android, iOS, and web support">
-				<ThemedText>
-					You can open this project on Android, iOS, and the web. To open the
-					web version, press <ThemedText type="defaultSemiBold">w</ThemedText>{" "}
-					in the terminal running this project.
-				</ThemedText>
-			</Collapsible>
-			<Collapsible title="Images">
-				<ThemedText>
-					For static images, you can use the{" "}
-					<ThemedText type="defaultSemiBold">@2x</ThemedText> and{" "}
-					<ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to
-					provide files for different screen densities
-				</ThemedText>
-				<Image
-					source={require("@/assets/images/react-logo.png")}
-					style={{ alignSelf: "center" }}
-				/>
-				<ExternalLink href="https://reactnative.dev/docs/images">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Custom fonts">
-				<ThemedText>
-					Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText>{" "}
-					to see how to load{" "}
-					<ThemedText style={{ fontFamily: "SpaceMono" }}>
-						custom fonts such as this one.
-					</ThemedText>
-				</ThemedText>
-				<ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Light and dark mode components">
-				<ThemedText>
-					This template has light and dark mode support. The{" "}
-					<ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook
-					lets you inspect what the user's current color scheme is, and so you
-					can adjust UI colors accordingly.
-				</ThemedText>
-				<ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-					<ThemedText type="link">Learn more</ThemedText>
-				</ExternalLink>
-			</Collapsible>
-			<Collapsible title="Animations">
-				<ThemedText>
-					This template includes an example of an animated component. The{" "}
-					<ThemedText type="defaultSemiBold">
-						components/HelloWave.tsx
-					</ThemedText>{" "}
-					component uses the powerful{" "}
-					<ThemedText type="defaultSemiBold">
-						react-native-reanimated
-					</ThemedText>{" "}
-					library to create a waving hand animation.
-				</ThemedText>
-				{Platform.select({
-					ios: (
-						<ThemedText>
-							The{" "}
-							<ThemedText type="defaultSemiBold">
-								components/ParallaxScrollView.tsx
-							</ThemedText>{" "}
-							component provides a parallax effect for the header image.
-						</ThemedText>
-					),
-				})}
-			</Collapsible>
-		</ParallaxScrollView>
-	);
-}
 
-const styles = StyleSheet.create({
-	headerImage: {
-		color: "#808080",
-		bottom: -90,
-		left: -35,
-		position: "absolute",
-	},
-	titleContainer: {
-		flexDirection: "row",
-		gap: 8,
-	},
-});
+			Alert.alert("通知を設定しました");
+			setTripDestination("");
+			setScheduleItems([]);
+		} catch (error) {
+			console.error("Firestoreへの送信エラー:", error);
+		}
+	};
+
+	const isAddButtonDisabled = !itemName || notificationInterval === null;
+	const isSubmitButtonDisabled = !tripDestination || scheduleItems.length === 0;
+
+	return (
+		<View style={styles.container}>
+			<Text style={styles.header}>通知設定</Text>
+
+			<Text style={styles.label}>行き先</Text>
+			<TextInput
+				style={styles.input}
+				placeholder="行き先を入力"
+				value={tripDestination}
+				onChangeText={setTripDestination}
+				placeholderTextColor={"#C0C0C0"}
+			/>
+
+			<Text style={styles.label}>通知アイテム名</Text>
+			<TextInput
+				style={styles.input}
+				placeholder="アイテム名を入力"
+				value={itemName}
+				onChangeText={setItemName}
+				placeholderTextColor={"#C0C0C0"}
+			/>
+
+			<Text style={styles.label}>通知間隔</Text>
+			<DropDownPicker
+				open={isDropdownOpen}
+				value={dropdownValue}
+				items={dropdownOptions}
+				setOpen={setIsDropdownOpen}
+				setValue={(val) => {
+					setDropdownValue(val);
+					setNotificationInterval(val ?? null);
+				}}
+				setItems={setDropdownOptions}
+				placeholder="通知間隔を選択"
+				style={styles.dropdown}
+				dropDownContainerStyle={styles.dropdownContainer}
+			/>
+
+			<TouchableOpacity
+				style={[styles.addButton, isAddButtonDisabled && styles.disabledButton]}
+				onPress={addScheduleItem}
+				disabled={isAddButtonDisabled}
+			>
+				<Text style={styles.addButtonText}>+ アイテムを追加</Text>
+			</TouchableOpacity>
+
+			<FlatList
+				data={scheduleItems}
+				keyExtractor={(_, index) => index.toString()}
+				renderItem={({ item, index }) => (
+					<View style={styles.item}>
+						<View>
+							<Text style={styles.itemName}>{item.name}</Text>
+							<Text style={styles.itemInterval}>
+								通知間隔: {item.reminderInterval}h
+							</Text>
+						</View>
+						<TouchableOpacity
+							style={styles.deleteButton}
+							onPress={() => removeScheduleItem(index)}
+						>
+							<Text style={styles.deleteButtonText}>削除</Text>
+						</TouchableOpacity>
+					</View>
+				)}
+			/>
+
+			<TouchableOpacity
+				style={[
+					styles.submitButton,
+					isSubmitButtonDisabled && styles.disabledButton,
+				]}
+				onPress={submitTripPlan}
+				disabled={isSubmitButtonDisabled}
+			>
+				<Text style={styles.submitButtonText}>送信</Text>
+			</TouchableOpacity>
+		</View>
+	);
+};
+
+export default TripPlanner;

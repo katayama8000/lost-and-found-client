@@ -1,84 +1,98 @@
-import { Button, Image, Platform, StyleSheet } from "react-native";
-
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { db } from "@/config/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
+import type React from "react";
+import { type FC, useEffect, useState } from "react";
+import { FlatList, Text, View } from "react-native";
+import { itemConverter } from "../../converter/itemConverter";
+import { styles } from "./index.style";
 
-export default function HomeScreen() {
-	const handleClick = async () => {
-		await setDoc(doc(db, "cities", "LA"), {
-			name: "Los Angeles",
-			state: "CA",
-			country: "USA",
-		});
+export type Item = {
+	id: string;
+	name: string;
+	notificationInterval: number | null;
+	lastNotifiedAt: string | null;
+	isNotifyEnabled: boolean;
+	lastConfirmedAt: string | null;
+	status: string;
+};
+
+const HomeScreen = () => {
+	const [items, setItems] = useState<Item[]>([]);
+	const userId = "katayama8000"; // Replace with the current user's ID
+	const tripId = "XM3tC0Wi1Mw0IHcBgobR"; // Replace with the actual trip ID you want to fetch items for
+
+	const getStatusColor = (status: string) => {
+		switch (status) {
+			case "確認":
+				return styles.confirmed;
+			case "確認していない":
+				return styles.unchecked;
+			case "無くした":
+				return styles.lost;
+			default:
+				return styles.defaultStatus;
+		}
 	};
-	return (
-		<ParallaxScrollView
-			headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-			headerImage={
-				<Image
-					source={require("@/assets/images/partial-react-logo.png")}
-					style={styles.reactLogo}
-				/>
-			}
-		>
-			<ThemedView style={styles.titleContainer}>
-				<ThemedText type="title">Welcome!</ThemedText>
-				<HelloWave />
-			</ThemedView>
-			<Button title="write" onPress={handleClick} />
-			<ThemedView style={styles.stepContainer}>
-				<ThemedText type="subtitle">Step 1: Try it</ThemedText>
-				<ThemedText>
-					Edit{" "}
-					<ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-					to see changes. Press{" "}
-					<ThemedText type="defaultSemiBold">
-						{Platform.select({ ios: "cmd + d", android: "cmd + m" })}
-					</ThemedText>{" "}
-					to open developer tools.
-				</ThemedText>
-			</ThemedView>
-			<ThemedView style={styles.stepContainer}>
-				<ThemedText type="subtitle">Step 2: Explore</ThemedText>
-				<ThemedText>
-					Tap the Explore tab to learn more about what's included in this
-					starter app.
-				</ThemedText>
-			</ThemedView>
-			<ThemedView style={styles.stepContainer}>
-				<ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-				<ThemedText>
-					When you're ready, run{" "}
-					<ThemedText type="defaultSemiBold">npm run reset-project</ThemedText>{" "}
-					to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-					directory. This will move the current{" "}
-					<ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-					<ThemedText type="defaultSemiBold">app-example</ThemedText>.
-				</ThemedText>
-			</ThemedView>
-		</ParallaxScrollView>
-	);
-}
 
-const styles = StyleSheet.create({
-	titleContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 8,
-	},
-	stepContainer: {
-		gap: 8,
-		marginBottom: 8,
-	},
-	reactLogo: {
-		height: 178,
-		width: 290,
-		bottom: 0,
-		left: 0,
-		position: "absolute",
-	},
-});
+	const fetchItems = async () => {
+		try {
+			const itemsCollection = collection(
+				db,
+				"users",
+				userId,
+				"trips",
+				tripId,
+				"items",
+			).withConverter(itemConverter);
+			const itemSnapshot = await getDocs(itemsCollection);
+			const itemList = itemSnapshot.docs.map((doc) => doc.data());
+
+			setItems(itemList);
+		} catch (error) {
+			console.error("Error fetching items from Firestore:", error);
+		}
+	};
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		fetchItems();
+	}, []);
+
+	return (
+		<View style={styles.container}>
+			<Text style={styles.header}>バリ旅行</Text>
+			<FlatList
+				data={items}
+				renderItem={({ item }) => (
+					<Item item={item} getStatusColor={getStatusColor} />
+				)}
+				keyExtractor={(item) => item.id}
+			/>
+		</View>
+	);
+};
+
+type ItemProps = {
+	item: Item;
+	getStatusColor: (status: string) => object;
+};
+
+const Item: FC<ItemProps> = ({ item, getStatusColor }) => {
+	return (
+		<View style={[styles.item, getStatusColor(item.status)]}>
+			<Text style={styles.title}>{item.name}</Text>
+			{item.lastNotifiedAt ? (
+				<Text style={styles.info}>最終通知日時: {item.lastNotifiedAt}</Text>
+			) : (
+				<Text style={[styles.info, styles.nullInfo]}>通知なし</Text>
+			)}
+			{item.lastConfirmedAt ? (
+				<Text style={styles.info}>最終確認日時: {item.lastConfirmedAt}</Text>
+			) : (
+				<Text style={[styles.info, styles.nullInfo]}>未確認</Text>
+			)}
+		</View>
+	);
+};
+
+export default HomeScreen;

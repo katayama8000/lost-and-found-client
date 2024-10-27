@@ -1,18 +1,13 @@
-import {
-	DarkTheme,
-	DefaultTheme,
-	ThemeProvider,
-} from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef, useState } from "react";
 import "react-native-reanimated";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { Button, Platform, Text, View } from "react-native";
+import { Platform } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -97,7 +92,6 @@ async function registerForPushNotificationsAsync() {
 }
 
 export default function RootLayout() {
-	const colorScheme = useColorScheme();
 	const [loaded] = useFonts({
 		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
 	});
@@ -145,8 +139,8 @@ export default function RootLayout() {
 	}
 
 	return (
-		<ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-			<Text>Your Expo push token: {expoPushToken}</Text>
+		<ThemeProvider value={DefaultTheme}>
+			{/* <Text>Your Expo push token: {expoPushToken}</Text>
 			<View style={{ alignItems: "center", justifyContent: "center" }}>
 				<Text>Title: {notification?.request.content.title} </Text>
 				<Text>Body: {notification?.request.content.body}</Text>
@@ -160,7 +154,7 @@ export default function RootLayout() {
 				onPress={async () => {
 					await sendPushNotification(expoPushToken);
 				}}
-			/>
+			/> */}
 			<Stack>
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen name="+not-found" />
