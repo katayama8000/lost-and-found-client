@@ -11,14 +11,14 @@ import {
 	View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { styles } from "./explore.style";
+import { styles } from "./registerForm.style";
 
 type ScheduleItem = {
 	name: string;
 	reminderInterval: number;
 };
 
-const TripPlanner: FC = () => {
+const registerForm: FC = () => {
 	const [tripDestination, setTripDestination] = useState<string>("");
 	const [itemName, setItemName] = useState<string>("");
 	const [notificationInterval, setNotificationInterval] = useState<
@@ -163,4 +163,4 @@ const TripPlanner: FC = () => {
 	);
 };
 
-export default TripPlanner;
+export default registerForm;
