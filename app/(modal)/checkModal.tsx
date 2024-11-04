@@ -2,8 +2,8 @@ import { db } from "@/config/firebase";
 import { tripId, userId } from "@/constants/Ids";
 import { itemConverter } from "@/converter/itemConverter";
 import { useLocalSearchParams } from "expo-router";
-import { collection, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { type FC, useEffect, useState } from "react";
 import {
 	Alert,
 	Button,
@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import type { Item } from "../(tabs)";
 
-const ItemStatusModal = () => {
+const ItemStatusModal: FC = () => {
 	const [items, setItems] = useState<Item[]>([]);
 	const [itemStatuses, setItemStatuses] = useState<Record<string, string>>({});
 	const { ids } = useLocalSearchParams();
@@ -54,12 +54,32 @@ const ItemStatusModal = () => {
 		setItemStatuses((prevStatuses) => ({ ...prevStatuses, [itemId]: status }));
 	};
 
-	const submitStatuses = () => {
+	const submitStatuses = async () => {
 		console.log("Submitted item statuses:", itemStatuses);
 		Alert.alert(
 			"Statuses submitted",
 			"Your item statuses have been submitted.",
 		);
+		const statusMap: Record<Item["status"], "checked" | "unchecked" | "lost"> =
+			{
+				ある: "checked",
+				ない: "unchecked",
+				わからない: "lost",
+			} as const;
+
+		const today = new Date();
+		console.log("Items:", items);
+		for (const item of items) {
+			await setDoc(
+				doc(db, "users", userId, "trips", tripId, "items", item.id),
+				{
+					...item,
+					lastConfirmedAt:
+						itemStatuses[item.id] === "ある" ? today.toISOString() : null,
+					status: statusMap[itemStatuses[item.id]],
+				},
+			);
+		}
 	};
 
 	const statusStyles = {
