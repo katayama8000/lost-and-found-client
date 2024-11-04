@@ -15,14 +15,14 @@ import {
 } from "react-native";
 import type { Item } from "../(tabs)";
 
-const checkModal = () => {
+const ItemStatusModal = () => {
 	const [items, setItems] = useState<Item[]>([]);
-	const [statuses, setStatuses] = useState<{ [key: string]: string }>({});
+	const [itemStatuses, setItemStatuses] = useState<Record<string, string>>({});
 	const { ids } = useLocalSearchParams();
 
 	const fetchItems = async () => {
 		try {
-			const itemsCollection = collection(
+			const itemsRef = collection(
 				db,
 				"users",
 				userId,
@@ -30,19 +30,18 @@ const checkModal = () => {
 				tripId,
 				"items",
 			).withConverter(itemConverter);
-			const itemSnapshot = await getDocs(itemsCollection);
-			const itemList = itemSnapshot.docs.map((doc) => doc.data());
-			const filteredItems = itemList.filter((item) => ids.includes(item.id));
-			setItems(filteredItems);
+			const itemsSnapshot = await getDocs(itemsRef);
+			const fetchedItems = itemsSnapshot.docs.map((doc) => doc.data());
+			const filteredItems = fetchedItems.filter((item) =>
+				ids.includes(item.id),
+			);
 
-			// Initialize statuses with default values
-			const initialStatuses: { [key: string]: string } = {};
-			for (const item of filteredItems) {
-				initialStatuses[item.id] = item.status;
-			}
-			setStatuses(initialStatuses);
+			setItems(filteredItems);
+			setItemStatuses(
+				Object.fromEntries(filteredItems.map((item) => [item.id, item.status])),
+			);
 		} catch (error) {
-			console.error("Error fetching items from Firestore:", error);
+			console.error("Error loading items from Firestore:", error);
 		}
 	};
 
@@ -51,58 +50,69 @@ const checkModal = () => {
 		fetchItems();
 	}, []);
 
-	const handleStatusChange = (itemId: string, status: string) => {
-		setStatuses((prevStatuses) => ({ ...prevStatuses, [itemId]: status }));
+	const changeItemStatus = (itemId: string, status: string) => {
+		setItemStatuses((prevStatuses) => ({ ...prevStatuses, [itemId]: status }));
 	};
 
-	const handleSubmit = () => {
-		console.log("Submitted statuses:", statuses);
+	const submitStatuses = () => {
+		console.log("Submitted item statuses:", itemStatuses);
 		Alert.alert(
 			"Statuses submitted",
 			"Your item statuses have been submitted.",
 		);
 	};
 
+	const statusStyles = {
+		ある: styles.availableButton,
+		ない: styles.unavailableButton,
+		わからない: styles.unknownButton,
+	} as const;
+
+	const statusTranslation = (status: Item["status"]) => {
+		switch (status) {
+			case "checked":
+				return "ある";
+			case "unchecked":
+				return "ない";
+			case "lost":
+				return "わからない";
+			default:
+				return "わからない";
+		}
+	};
+
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
 			<Text style={styles.header}>Item Status Check</Text>
 			{items.map((item) => (
-				<View key={item.id} style={styles.itemContainer}>
+				<View key={item.id} style={styles.itemCard}>
 					<Text style={styles.itemName}>{item.name}</Text>
-					<Text>最終通知日時: {item.lastNotifiedAt || "未設定"}</Text>
-					<Text>最終確認日時: {item.lastConfirmedAt || "未設定"}</Text>
+					<Text>Last Notified: {item.lastNotifiedAt || "未設定"}</Text>
+					<Text>Last Confirmed: {item.lastConfirmedAt || "未設定"}</Text>
+					<Text>Current Status: {statusTranslation(item.status)}</Text>
 					<View style={styles.buttonGroup}>
-						{["ある", "ない", "			"].map((status) => (
+						{(["ある", "ない", "わからない"] as const).map((status) => (
 							<TouchableOpacity
 								key={status}
 								style={[
 									styles.statusButton,
-									statuses[item.id] === status && styles.selectedButton,
-									// status === "ある"
-									// 	? styles.confirmedButton
-									// 	: status === "ない"
-									// 		? styles.uncheckedButton
-									// 		: styles.unknownButton,
-
-									// 三項演算子を使ってもいいけど、Mapを使うともっと簡潔に書ける
-									styles[
-										`${status === "ある" ? "confirmed" : status === "ない" ? "unchecked" : "unknown"}Button`
-									],
+									itemStatuses[item.id] === status && styles.selectedButton,
+									statusStyles[status],
 								]}
-								onPress={() => handleStatusChange(item.id, status)}
+								onPress={() => changeItemStatus(item.id, status)}
 							>
-								<Text style={styles.buttonText}>{status}</Text>
+								<Text style={styles.statusButtonText}>{status}</Text>
 							</TouchableOpacity>
 						))}
 					</View>
 				</View>
 			))}
-			<Button title="Submit" onPress={handleSubmit} />
+			<Button title="Submit" onPress={submitStatuses} />
 		</ScrollView>
 	);
 };
 
-export default checkModal;
+export default ItemStatusModal;
 
 const styles = StyleSheet.create({
 	container: {
@@ -115,7 +125,7 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 		textAlign: "center",
 	},
-	itemContainer: {
+	itemCard: {
 		padding: 15,
 		marginBottom: 20,
 		backgroundColor: "#ffffff",
@@ -146,16 +156,16 @@ const styles = StyleSheet.create({
 		borderColor: "#000",
 		borderWidth: 1,
 	},
-	confirmedButton: {
-		backgroundColor: "#4CAF50", // Green for "ある"
+	availableButton: {
+		backgroundColor: "#4CAF50",
 	},
-	uncheckedButton: {
-		backgroundColor: "#F44336", // Red for "ない"
+	unavailableButton: {
+		backgroundColor: "#F44336",
 	},
 	unknownButton: {
-		backgroundColor: "#FFC107", // Yellow for "わからない"
+		backgroundColor: "#FFC107",
 	},
-	buttonText: {
+	statusButtonText: {
 		color: "#ffffff",
 		fontWeight: "bold",
 	},
