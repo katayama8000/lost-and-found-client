@@ -68,13 +68,16 @@ const ItemStatusModal: FC = () => {
 			} as const;
 
 		const today = new Date();
-		console.log("Items:", items);
+		const todayInJST = new Date(today.getTime() + 9 * 60 * 60 * 1000);
 		for (const item of items) {
 			await setDoc(
 				doc(db, "users", userId, "trips", tripId, "items", item.id),
 				{
 					...item,
-					lastConfirmedAt: today.toISOString(),
+					lastConfirmedAt:
+						itemStatuses[item.id] === "ある"
+							? todayInJST.toISOString()
+							: item.lastConfirmedAt,
 					status: statusMap[itemStatuses[item.id]],
 				},
 			);
