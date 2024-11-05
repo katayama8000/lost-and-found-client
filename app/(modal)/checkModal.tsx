@@ -74,8 +74,7 @@ const ItemStatusModal: FC = () => {
 				doc(db, "users", userId, "trips", tripId, "items", item.id),
 				{
 					...item,
-					lastConfirmedAt:
-						itemStatuses[item.id] === "ある" ? today.toISOString() : null,
+					lastConfirmedAt: today.toISOString(),
 					status: statusMap[itemStatuses[item.id]],
 				},
 			);

@@ -11,7 +11,7 @@ User:
     Item: # Collection
       name:
         type: string
-      notificationInterval:
+      reminderInterval:
         type: number  
       lastNotifiedAt:
         type: Timestamp  

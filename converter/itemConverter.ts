@@ -5,7 +5,7 @@ export const itemConverter = {
 	toFirestore: (item: Item): DocumentData => {
 		return {
 			name: item.name,
-			notificationInterval: item.notificationInterval,
+			reminderInterval: item.reminderInterval,
 			lastNotifiedAt: item.lastNotifiedAt,
 			isNotifyEnabled: item.isNotifyEnabled,
 			lastConfirmedAt: item.lastConfirmedAt,
@@ -17,7 +17,7 @@ export const itemConverter = {
 		return {
 			id: snapshot.id,
 			name: data.name,
-			notificationInterval: data.notificationInterval,
+			reminderInterval: data.reminderInterval,
 			lastNotifiedAt: data.lastNotifiedAt,
 			isNotifyEnabled: data.isNotifyEnabled,
 			lastConfirmedAt: data.lastConfirmedAt,

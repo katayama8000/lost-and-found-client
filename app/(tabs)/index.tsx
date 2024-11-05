@@ -11,7 +11,7 @@ import { styles } from "./index.style";
 export type Item = {
 	id: string;
 	name: string;
-	notificationInterval: number | null;
+	reminderInterval: number | null;
 	lastNotifiedAt: string | null;
 	isNotifyEnabled: boolean;
 	lastConfirmedAt: string | null;
