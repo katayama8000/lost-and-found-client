@@ -1,10 +1,10 @@
 import { db } from "@/config/firebase";
 import { tripId, userId } from "@/constants/Ids";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import type React from "react";
-import { type FC, useEffect, useState } from "react";
-import { Button, FlatList, Text, View } from "react-native";
+import { type FC, useState } from "react";
+import { FlatList, Text, View } from "react-native";
 import { itemConverter } from "../../converter/itemConverter";
 import { styles } from "./index.style";
 
@@ -20,15 +20,14 @@ export type Item = {
 
 const HomeScreen = () => {
 	const [items, setItems] = useState<Item[]>([]);
-	const { push } = useRouter();
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case "確認":
+			case "checked":
 				return styles.confirmed;
-			case "確認していない":
+			case "unchecked":
 				return styles.unchecked;
-			case "無くした":
+			case "lost":
 				return styles.lost;
 			default:
 				return styles.defaultStatus;
@@ -54,24 +53,13 @@ const HomeScreen = () => {
 		}
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
+	useFocusEffect(() => {
 		fetchItems();
-	}, []);
+	});
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.header}>バリ旅行</Text>
-			{/* --- delete --- */}
-			<Button
-				title="openModal"
-				onPress={() => {
-					push("/checkModal");
-				}}
-			/>
-			{/* send push notification */}
-
-			{/* --- delete --- */}
+			<Text style={styles.header}>旅行</Text>
 			<FlatList
 				data={items}
 				renderItem={({ item }) => (

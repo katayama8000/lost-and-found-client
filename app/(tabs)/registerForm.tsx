@@ -77,6 +77,7 @@ const registerForm: FC = () => {
 		}
 	};
 
+	// controls for button states
 	const isAddButtonDisabled = !itemName || reminderInterval === null;
 	const isSubmitButtonDisabled = !tripDestination || scheduleItems.length === 0;
 
@@ -146,7 +147,6 @@ const registerForm: FC = () => {
 					</View>
 				)}
 			/>
-
 			<TouchableOpacity
 				style={[
 					styles.submitButton,

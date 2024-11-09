@@ -23,10 +23,7 @@ Notifications.setNotificationHandler({
 	}),
 });
 
-const ids = [
-	"886aPRfK6jjEnriCXguO",
-	// ,"scwYbA6bD5G4lRPyFdgx"
-];
+const ids = ["886aPRfK6jjEnriCXguO", "scwYbA6bD5G4lRPyFdgx"];
 
 export async function sendPushNotification(expoPushToken: string) {
 	const message = {
@@ -166,7 +163,7 @@ export default function RootLayout() {
 
 	return (
 		<ThemeProvider value={DefaultTheme}>
-			<Text>Your Expo push token: {expoPushToken}</Text>
+			{/* <Text>Your Expo push token: {expoPushToken}</Text>
 			<View style={{ alignItems: "center", justifyContent: "center" }}>
 				<Text>Title: {notification?.request.content.title} </Text>
 				<Text>Body: {notification?.request.content.body}</Text>
@@ -174,7 +171,8 @@ export default function RootLayout() {
 					Data:{" "}
 					{notification && JSON.stringify(notification.request.content.data)}
 				</Text>
-			</View>
+			</View> */}
+			<View style={{ height: 30 }} />
 			<Button
 				title="Press to Send Notification"
 				onPress={async () => {
@@ -185,11 +183,7 @@ export default function RootLayout() {
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen
 					name="(modal)/checkModal"
-					options={{
-						presentation: "modal",
-						animation: "fade",
-						headerShown: false,
-					}}
+					options={{ presentation: "modal" }}
 				/>
 				<Stack.Screen name="+not-found" />
 			</Stack>

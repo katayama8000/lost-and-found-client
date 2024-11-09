@@ -13,6 +13,7 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 import type { Item } from "../(tabs)";
 
 const ItemStatusModal: FC = () => {
@@ -80,8 +81,8 @@ const ItemStatusModal: FC = () => {
 			"checked" | "unchecked" | "lost"
 		> = {
 			ある: "checked",
-			ない: "unchecked",
-			わからない: "lost",
+			わからない: "unchecked",
+			ない: "lost",
 		};
 
 		const todayInJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
@@ -113,9 +114,9 @@ const ItemStatusModal: FC = () => {
 			case "checked":
 				return "ある";
 			case "unchecked":
-				return "ない";
-			case "lost":
 				return "わからない";
+			case "lost":
+				return "ない";
 			default:
 				return "わからない";
 		}
@@ -131,7 +132,7 @@ const ItemStatusModal: FC = () => {
 					<Text>Last Confirmed: {item.lastConfirmedAt || "未設定"}</Text>
 					<Text>Current Status: {statusTranslation(item.status)}</Text>
 					<View style={styles.buttonGroup}>
-						{(["ある", "ない", "わからない"] as const).map((status) => (
+						{(["ある", "わからない", "ない"] as const).map((status) => (
 							<TouchableOpacity
 								key={status}
 								style={[
@@ -147,7 +148,20 @@ const ItemStatusModal: FC = () => {
 					</View>
 				</View>
 			))}
-			<Button title="Submit" onPress={submitStatuses} />
+			<TouchableOpacity
+				onPress={submitStatuses}
+				style={{
+					backgroundColor: Colors.primary,
+					padding: 10,
+					borderRadius: 5,
+				}}
+			>
+				<Text
+					style={{ color: "#ffffff", textAlign: "center", fontWeight: "bold" }}
+				>
+					送信
+				</Text>
+			</TouchableOpacity>
 		</ScrollView>
 	);
 };
