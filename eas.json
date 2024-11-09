@@ -5,8 +5,18 @@
     "build": {
         "development": {
             "developmentClient": true,
-            "distribution": "internal"
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "autoIncrement": "true"
         },
-        "production": {}
+        "production": {
+            "distribution": "internal",
+            "autoIncrement": "true",
+            "android": {
+                "buildType": "apk"
+            }
+        }
     }
 }
