@@ -1,7 +1,9 @@
 import { db } from "@/config/firebase";
+import { tripId, userId } from "@/constants/Ids";
+import { useFocusEffect, useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import type React from "react";
-import { type FC, useEffect, useState } from "react";
+import { type FC, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 import { itemConverter } from "../../converter/itemConverter";
 import { styles } from "./index.style";
@@ -9,25 +11,23 @@ import { styles } from "./index.style";
 export type Item = {
 	id: string;
 	name: string;
-	notificationInterval: number | null;
+	reminderInterval: number | null;
 	lastNotifiedAt: string | null;
 	isNotifyEnabled: boolean;
 	lastConfirmedAt: string | null;
-	status: string;
+	status: string | undefined;
 };
 
 const HomeScreen = () => {
 	const [items, setItems] = useState<Item[]>([]);
-	const userId = "katayama8000"; // Replace with the current user's ID
-	const tripId = "XM3tC0Wi1Mw0IHcBgobR"; // Replace with the actual trip ID you want to fetch items for
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case "確認":
+			case "checked":
 				return styles.confirmed;
-			case "確認していない":
+			case "unchecked":
 				return styles.unchecked;
-			case "無くした":
+			case "lost":
 				return styles.lost;
 			default:
 				return styles.defaultStatus;
@@ -53,14 +53,13 @@ const HomeScreen = () => {
 		}
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
+	useFocusEffect(() => {
 		fetchItems();
-	}, []);
+	});
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.header}>バリ旅行</Text>
+			<Text style={styles.header}>旅行</Text>
 			<FlatList
 				data={items}
 				renderItem={({ item }) => (
@@ -79,7 +78,9 @@ type ItemProps = {
 
 const Item: FC<ItemProps> = ({ item, getStatusColor }) => {
 	return (
-		<View style={[styles.item, getStatusColor(item.status)]}>
+		<View
+			style={[styles.item, getStatusColor(item.status ?? "確認していない")]}
+		>
 			<Text style={styles.title}>{item.name}</Text>
 			{item.lastNotifiedAt ? (
 				<Text style={styles.info}>最終通知日時: {item.lastNotifiedAt}</Text>

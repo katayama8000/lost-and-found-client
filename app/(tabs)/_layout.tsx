@@ -1,8 +1,7 @@
-import { Tabs } from "expo-router";
-import React from "react";
-
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
+import { Tabs } from "expo-router";
+import React from "react";
 
 export default function TabLayout() {
 	return (
@@ -25,9 +24,9 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="explore"
+				name="registerForm"
 				options={{
-					title: "Explore",
+					title: "登録",
 					tabBarIcon: ({ color, focused }) => (
 						<TabBarIcon
 							name={focused ? "code-slash" : "code-slash-outline"}

@@ -1,8 +1,6 @@
 User:
-  tokens:
-    type: array
-    items:
-      type: string
+  pushToken:
+    type: string
   Trip: # Collection
     destination:
       type: string
@@ -13,7 +11,7 @@ User:
     Item: # Collection
       name:
         type: string
-      notificationInterval:
+      reminderInterval:
         type: number  
       lastNotifiedAt:
         type: Timestamp  
@@ -22,7 +20,7 @@ User:
       lastConfirmedAt:
         type: Timestamp  
       status:
-        type: string
+        type: string | undefined
         enum:
           - checked
           - unchecked

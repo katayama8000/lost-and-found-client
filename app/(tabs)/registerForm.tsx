@@ -11,19 +11,17 @@ import {
 	View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { styles } from "./explore.style";
+import { styles } from "./registerForm.style";
 
 type ScheduleItem = {
 	name: string;
 	reminderInterval: number;
 };
 
-const TripPlanner: FC = () => {
+const registerForm: FC = () => {
 	const [tripDestination, setTripDestination] = useState<string>("");
 	const [itemName, setItemName] = useState<string>("");
-	const [notificationInterval, setNotificationInterval] = useState<
-		number | null
-	>(null);
+	const [reminderInterval, setreminderInterval] = useState<number | null>(null);
 	const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
 	const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 	const [dropdownValue, setDropdownValue] = useState<number | null>(null);
@@ -36,13 +34,13 @@ const TripPlanner: FC = () => {
 	]);
 
 	const addScheduleItem = () => {
-		if (!itemName || notificationInterval === null) return;
+		if (!itemName || reminderInterval === null) return;
 		setScheduleItems([
 			...scheduleItems,
-			{ name: itemName, reminderInterval: notificationInterval },
+			{ name: itemName, reminderInterval: reminderInterval },
 		]);
 		setItemName("");
-		setNotificationInterval(null);
+		setreminderInterval(null);
 		setDropdownValue(null);
 	};
 
@@ -79,7 +77,8 @@ const TripPlanner: FC = () => {
 		}
 	};
 
-	const isAddButtonDisabled = !itemName || notificationInterval === null;
+	// controls for button states
+	const isAddButtonDisabled = !itemName || reminderInterval === null;
 	const isSubmitButtonDisabled = !tripDestination || scheduleItems.length === 0;
 
 	return (
@@ -112,7 +111,7 @@ const TripPlanner: FC = () => {
 				setOpen={setIsDropdownOpen}
 				setValue={(val) => {
 					setDropdownValue(val);
-					setNotificationInterval(val ?? null);
+					setreminderInterval(val ?? null);
 				}}
 				setItems={setDropdownOptions}
 				placeholder="通知間隔を選択"
@@ -148,7 +147,6 @@ const TripPlanner: FC = () => {
 					</View>
 				)}
 			/>
-
 			<TouchableOpacity
 				style={[
 					styles.submitButton,
@@ -163,4 +161,4 @@ const TripPlanner: FC = () => {
 	);
 };
 
-export default TripPlanner;
+export default registerForm;

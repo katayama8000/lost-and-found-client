@@ -5,19 +5,16 @@ export const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
-		backgroundColor: "#f7fafc",
 	},
 	header: {
 		fontSize: 26,
 		fontWeight: "bold",
 		marginBottom: 20,
 		textAlign: "center",
-		color: Colors.primary,
 	},
 	label: {
 		fontSize: 18,
 		marginBottom: 10,
-		color: Colors.primary,
 	},
 	input: {
 		height: 50,
