@@ -21,7 +21,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.katayama9000.lostandfound",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 3
     },
     "web": {
       "bundler": "metro",
