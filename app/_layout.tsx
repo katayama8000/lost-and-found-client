@@ -10,7 +10,7 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { doc, setDoc } from "firebase/firestore";
-import { Button, Platform, Text, View } from "react-native";
+import { Platform, View } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -18,32 +18,10 @@ SplashScreen.preventAutoHideAsync();
 Notifications.setNotificationHandler({
 	handleNotification: async () => ({
 		shouldShowAlert: true,
-		shouldPlaySound: false,
+		shouldPlaySound: true,
 		shouldSetBadge: false,
 	}),
 });
-
-const ids = ["886aPRfK6jjEnriCXguO", "scwYbA6bD5G4lRPyFdgx"];
-
-export async function sendPushNotification(expoPushToken: string) {
-	const message = {
-		to: expoPushToken,
-		sound: "default",
-		title: "Original Title",
-		body: "And here is the body!",
-		data: { ids: ids },
-	};
-
-	await fetch("https://exp.host/--/api/v2/push/send", {
-		method: "POST",
-		headers: {
-			Accept: "application/json",
-			"Accept-encoding": "gzip, deflate",
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(message),
-	});
-}
 
 function handleRegistrationError(errorMessage: string) {
 	alert(errorMessage);
@@ -86,7 +64,6 @@ async function registerForPushNotificationsAsync() {
 					projectId,
 				})
 			).data;
-			console.log(pushTokenString);
 			return pushTokenString;
 		} catch (e: unknown) {
 			handleRegistrationError(`${e}`);
@@ -163,22 +140,7 @@ export default function RootLayout() {
 
 	return (
 		<ThemeProvider value={DefaultTheme}>
-			{/* <Text>Your Expo push token: {expoPushToken}</Text>
-			<View style={{ alignItems: "center", justifyContent: "center" }}>
-				<Text>Title: {notification?.request.content.title} </Text>
-				<Text>Body: {notification?.request.content.body}</Text>
-				<Text>
-					Data:{" "}
-					{notification && JSON.stringify(notification.request.content.data)}
-				</Text>
-			</View> */}
 			<View style={{ height: 30 }} />
-			<Button
-				title="Press to Send Notification"
-				onPress={async () => {
-					await sendPushNotification(expoPushToken);
-				}}
-			/>
 			<Stack>
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen

@@ -6,7 +6,6 @@ import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { type FC, useEffect, useState } from "react";
 import {
 	Alert,
-	Button,
 	ScrollView,
 	StyleSheet,
 	Text,
