@@ -1,1 +1,1 @@
-eas build --profile development --platform android --non-interactive --no-wait
+eas build --profile production --platform android --non-interactive --no-wait
