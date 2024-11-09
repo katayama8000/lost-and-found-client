@@ -20,7 +20,7 @@ User:
       lastConfirmedAt:
         type: Timestamp  
       status:
-        type: string
+        type: string | undefined
         enum:
           - checked
           - unchecked

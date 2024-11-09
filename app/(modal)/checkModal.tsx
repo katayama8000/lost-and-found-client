@@ -1,7 +1,7 @@
 import { db } from "@/config/firebase";
 import { tripId, userId } from "@/constants/Ids";
 import { itemConverter } from "@/converter/itemConverter";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { type FC, useEffect, useState } from "react";
 import {
@@ -17,8 +17,8 @@ import type { Item } from "../(tabs)";
 
 const ItemStatusModal: FC = () => {
 	const [items, setItems] = useState<Item[]>([]);
-	const [itemStatuses, setItemStatuses] = useState<Record<string, string>>({});
 	const { ids } = useLocalSearchParams();
+	const { back } = useRouter();
 
 	const fetchItems = async () => {
 		try {
@@ -37,9 +37,6 @@ const ItemStatusModal: FC = () => {
 			);
 
 			setItems(filteredItems);
-			setItemStatuses(
-				Object.fromEntries(filteredItems.map((item) => [item.id, item.status])),
-			);
 		} catch (error) {
 			console.error("Error loading items from Firestore:", error);
 		}
@@ -47,41 +44,62 @@ const ItemStatusModal: FC = () => {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		fetchItems();
+		(async () => {
+			await fetchItems();
+			// Reset all statuses to undefined to prevent accidental submission
+			setItems((prevItems) =>
+				prevItems.map((item) => ({ ...item, status: undefined })),
+			);
+		})();
 	}, []);
 
 	const changeItemStatus = (itemId: string, status: string) => {
-		setItemStatuses((prevStatuses) => ({ ...prevStatuses, [itemId]: status }));
+		setItems((prevItems) =>
+			prevItems.map((item) =>
+				item.id === itemId ? { ...item, status } : item,
+			),
+		);
 	};
 
 	const submitStatuses = async () => {
-		console.log("Submitted item statuses:", itemStatuses);
+		if (items.some((item) => item.status === undefined)) {
+			Alert.alert("Error", "Please select a status for all items.");
+			return;
+		}
+		console.log(
+			"Submitted item statuses:",
+			items.map((item) => ({ id: item.id, status: item.status })),
+		);
 		Alert.alert(
 			"Statuses submitted",
 			"Your item statuses have been submitted.",
 		);
-		const statusMap: Record<Item["status"], "checked" | "unchecked" | "lost"> =
-			{
-				ある: "checked",
-				ない: "unchecked",
-				わからない: "lost",
-			} as const;
 
-		const today = new Date();
-		const todayInJST = new Date(today.getTime() + 9 * 60 * 60 * 1000);
+		const statusMap: Record<
+			Exclude<Item["status"], undefined>,
+			"checked" | "unchecked" | "lost"
+		> = {
+			ある: "checked",
+			ない: "unchecked",
+			わからない: "lost",
+		};
+
+		const todayInJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
 		for (const item of items) {
 			await setDoc(
 				doc(db, "users", userId, "trips", tripId, "items", item.id),
 				{
 					...item,
 					lastConfirmedAt:
-						itemStatuses[item.id] === "ある"
+						item.status === "ある"
 							? todayInJST.toISOString()
 							: item.lastConfirmedAt,
-					status: statusMap[itemStatuses[item.id]],
+					// status can't be undefined here
+					status: statusMap[item.status as Exclude<Item["status"], undefined>],
 				},
 			);
 		}
+		back();
 	};
 
 	const statusStyles = {
@@ -118,7 +136,7 @@ const ItemStatusModal: FC = () => {
 								key={status}
 								style={[
 									styles.statusButton,
-									itemStatuses[item.id] === status && styles.selectedButton,
+									item.status === status && styles.selectedButton,
 									statusStyles[status],
 								]}
 								onPress={() => changeItemStatus(item.id, status)}

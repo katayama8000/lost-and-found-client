@@ -15,7 +15,7 @@ export type Item = {
 	lastNotifiedAt: string | null;
 	isNotifyEnabled: boolean;
 	lastConfirmedAt: string | null;
-	status: string;
+	status: string | undefined;
 };
 
 const HomeScreen = () => {
@@ -90,7 +90,9 @@ type ItemProps = {
 
 const Item: FC<ItemProps> = ({ item, getStatusColor }) => {
 	return (
-		<View style={[styles.item, getStatusColor(item.status)]}>
+		<View
+			style={[styles.item, getStatusColor(item.status ?? "確認していない")]}
+		>
 			<Text style={styles.title}>{item.name}</Text>
 			{item.lastNotifiedAt ? (
 				<Text style={styles.info}>最終通知日時: {item.lastNotifiedAt}</Text>
