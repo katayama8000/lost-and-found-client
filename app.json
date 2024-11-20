@@ -22,7 +22,7 @@
       },
       "package": "com.katayama9000.lostandfound",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 4
+      "versionCode": 5
     },
     "web": {
       "bundler": "metro",
