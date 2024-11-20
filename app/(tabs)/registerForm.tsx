@@ -11,7 +11,7 @@ import {
 	View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { styles } from "./registerForm.style";
+import { styles } from "../styles/registerForm.style";
 
 type ScheduleItem = {
 	name: string;
@@ -19,7 +19,7 @@ type ScheduleItem = {
 };
 
 const registerForm: FC = () => {
-	const [tripDestination, setTripDestination] = useState<string>("");
+	// const [tripDestination, setTripDestination] = useState<string>("");
 	const [itemName, setItemName] = useState<string>("");
 	const [reminderInterval, setreminderInterval] = useState<number | null>(null);
 	const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
@@ -51,13 +51,20 @@ const registerForm: FC = () => {
 	const submitTripPlan = async () => {
 		const userId = "katayama8000"; // TODO: Firebase AuthでログインしているユーザーのIDを取得する
 		try {
-			const tripRef = await addDoc(collection(db, "users", userId, "trips"), {
-				destination: tripDestination,
-			});
+			// const tripRef = await addDoc(collection(db, "users", userId, "trips"), {
+			// 	destination: tripDestination,
+			// });
 
 			for (const item of scheduleItems) {
 				await addDoc(
-					collection(db, "users", userId, "trips", tripRef.id, "items"),
+					collection(
+						db,
+						"users",
+						userId,
+						"trips",
+						"XM3tC0Wi1Mw0IHcBgobR",
+						"items",
+					),
 					{
 						name: item.name,
 						reminderInterval: item.reminderInterval,
@@ -70,7 +77,7 @@ const registerForm: FC = () => {
 			}
 
 			Alert.alert("通知を設定しました");
-			setTripDestination("");
+			// setTripDestination("");
 			setScheduleItems([]);
 		} catch (error) {
 			console.error("Firestoreへの送信エラー:", error);
@@ -79,20 +86,20 @@ const registerForm: FC = () => {
 
 	// controls for button states
 	const isAddButtonDisabled = !itemName || reminderInterval === null;
-	const isSubmitButtonDisabled = !tripDestination || scheduleItems.length === 0;
+	const isSubmitButtonDisabled = scheduleItems.length === 0;
 
 	return (
 		<View style={styles.container}>
 			<Text style={styles.header}>通知設定</Text>
 
-			<Text style={styles.label}>行き先</Text>
-			<TextInput
+			{/* <Text style={styles.label}>行き先</Text> */}
+			{/* <TextInput
 				style={styles.input}
 				placeholder="行き先を入力"
 				value={tripDestination}
 				onChangeText={setTripDestination}
 				placeholderTextColor={"#C0C0C0"}
-			/>
+			/> */}
 
 			<Text style={styles.label}>通知アイテム名</Text>
 			<TextInput

@@ -6,7 +6,7 @@ import type React from "react";
 import { type FC, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 import { itemConverter } from "../../converter/itemConverter";
-import { styles } from "./index.style";
+import { styles } from "../styles/index.style";
 
 export type Item = {
 	id: string;
