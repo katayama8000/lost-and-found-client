@@ -2,7 +2,7 @@ import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "react-native-reanimated";
 import { db } from "@/config/firebase";
 import { userId } from "@/constants/Ids";
@@ -84,38 +84,24 @@ export default function RootLayout() {
 		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
 	});
 
-	const [expoPushToken, setExpoPushToken] = useState<string>("");
-	const [notification, setNotification] = useState<
-		Notifications.Notification | undefined
-	>(undefined);
 	const notificationListener = useRef<Notifications.Subscription>();
 	const responseListener = useRef<Notifications.Subscription>();
 	const { push } = useRouter();
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		registerForPushNotificationsAsync()
-			.then((token) => {
-				if (token) {
-					setExpoPushToken(token);
-					storePushToken(token);
-				}
-			})
-			.catch((error) => setExpoPushToken(`${error}`));
+		registerForPushNotificationsAsync().then((token) => {
+			if (token) {
+				storePushToken(token);
+			}
+		});
 
 		notificationListener.current =
 			Notifications.addNotificationReceivedListener((notification) => {
-				setNotification(notification);
-				console.log(notification.request.content.data);
 				push({
 					pathname: "/checkModal",
 					params: notification.request.content.data,
 				});
-			});
-
-		responseListener.current =
-			Notifications.addNotificationResponseReceivedListener((response) => {
-				console.log(response);
 			});
 
 		return () => {
@@ -145,7 +131,7 @@ export default function RootLayout() {
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen
 					name="(modal)/checkModal"
-					options={{ presentation: "modal" }}
+					options={{ presentation: "modal", headerShown: false }}
 				/>
 				<Stack.Screen name="+not-found" />
 			</Stack>
